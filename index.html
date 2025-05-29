@@ -1,261 +1,377 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-<meta name="description" content="Get Lat Lon is a tool that allows you to easily grab the latitude and longitude coordinates anywhere in the world. It is great for coders who need to quickly grab the spatial coordinates of places."
-/>
-
-<meta name="keywords" content="GIS, GPS, latitude, longitude, geographic, mapping">
-
-<title>Get Latitude and Longitude Coordinates</title>
-
-	<script src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=places" type="text/javascript"></script>
-
-    <script src="https://www.google.com/jsapi?key=ABQIAAAAtHf2Vbojx_f9l2digk62nRR721nvlaDHrh7xkOtCxSM-c80RpRRMoUR4qEAqmJpECcqpdsdEs7YdIw" type="text/javascript"></script>
-    <script language="Javascript" type="text/javascript">
-
-		//Load libraries
-		google.load("jquery", "1.6.2");
-		google.load("jqueryui", "1.8.16");
-    </script>
-
-	<script src="js/infobubble.js" type="text/javascript"></script>
-    <script src="js/bootstrap.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
-	
-	<script>
-        $(function() {
-            $( ".draggable" ).draggable();
-        });
-    
-	</script>
-
-    <script type="text/javascript">
-	
-	var map;
-
-	var infobubblestyle = {
-		  shadowStyle: 1,
-		  padding: 5,
-		  backgroundColor: '#333',
-		  borderRadius: 4,
-		  arrowSize: 10,
-		  borderWidth: 0,
-		  borderColor: '#fff',
-		  disableAutoPan: true,
-		  hideCloseButton: true,
-		  arrowPosition: 50,
-		  arrowStyle: 0,
-		  maxWidth: 300,
-		  minWidth: 180,
-		  minHeight: 30,
-		  maxHeight: 30
-		};
-
-	var infowindow = new google.maps.InfoWindow();
-	
-function initialize() 
-{
-	var mapOptions = 
-	{
-		center: new google.maps.LatLng(0,0),
-		zoom: 2,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
-	map = new google.maps.Map(document.getElementById('map_canvas'),mapOptions);
-	
-		
-	var input = document.getElementById('location');	
-	var autocomplete = new google.maps.places.Autocomplete(input);
-	
-	//autocomplete.bindTo('bounds', map);
-	//autocomplete.setBounds(defaultBounds);
-
-	var marker = new google.maps.Marker({
-		map: map
-	});
-
-	$('#zl').val(map.getZoom());
-	dropMarker();
-	
-	google.maps.event.addListener(map, 'zoom_changed', function(e) {
-		$('#zl').val(map.getZoom());
-	});
-	
-	google.maps.event.addListener(autocomplete, 'place_changed', function() {
-		google.maps.event.trigger(map, 'resize');  
-		infowindow.close();
-		var place = autocomplete.getPlace();
-		var lat = place.geometry.location.lat();
-		var lng = place.geometry.location.lng();
-		
-		if (place.geometry.viewport) 
-		{
-			map.fitBounds(place.geometry.viewport);
-		} 
-		else 
-		{
-			map.setCenter(place.geometry.location);
-			map.setZoom(17);  // Why 17? Because it looks good.
-			//$('#coords').html(lat + ', ' + lng);
-			
-			updateCoordDisplay(lat,lng);
-			
-		}
-		
-		dropMarker();
-		/*var image = new google.maps.MarkerImage(
-		place.icon,
-		new google.maps.Size(71, 71),
-		new google.maps.Point(0, 0),
-		new google.maps.Point(17, 34),
-		new google.maps.Size(35, 35));
-		marker.setIcon(image);
-		marker.setPosition(place.geometry.location);*/
-	
-		var address = '';
-		if (place.address_components) 
-		{
-			address = [(place.address_components[0] &&
-			place.address_components[0].short_name || ''),
-			(place.address_components[1] &&
-			place.address_components[1].short_name || ''),
-			(place.address_components[2] &&
-			place.address_components[2].short_name || '')
-			].join(' ');
-	
-		jQuery('#latitude').val(place.geometry.location.lat());
-		jQuery('#longitude').val(place.geometry.location.lng());
-		//jQuery('#map_container').show();
-		}
-	
-		infowindow.setContent('<div style="font-size:10px;"><strong>' + place.name + '</strong><br>' + address);
-		//infowindow.open(map, marker);
-	});
-	
-}
-
-function updateCoordDisplay(lat,lng)
-{
-	$('#zl').val(map.getZoom());
-	$('#lat').val(lat);
-	$('#lng').val(lng);
-	$('#latlng').val(lat + ', ' + lng);
-	$('#lnglat').val(lng + ', ' + lat);
-	$('#latlngtab').val(lat + '	' + lng);
-	$('#lnglattab').val(lng + '	' + lat);
-	$('#map_canvas').css('height',$(window).height()-150);
-	google.maps.event.trigger(map, "resize");
-}
-			
-
-var marker;
-var infoBubble;
-function dropMarker()
-{
-	if(infoBubble){infoBubble.close()};
-	if(marker)
-	{
-		marker.setMap(null);
-	}
-	marker = new google.maps.Marker({
-		position: map.getCenter(), 
-		map: map, 
-		draggable: true,
-		animation: google.maps.Animation.DROP,
-		title:"Hello World!"
-
-	});   
-	
-	var lat = map.getCenter().lat();
-	var lng = map.getCenter().lng();
-	//$('#coords').html(lat + ', ' + lng);
-	updateCoordDisplay(lat,lng);
-	
-	//add info bubble
-	infoBubble = new InfoBubble(infobubblestyle);	
-	infoBubble.setContent('drag me to the exact location');
-	infoBubble.open(map,marker);
-	
-	google.maps.event.addListener(marker, 'mouseover', function() {
-		infoBubble.close();
-	});
-	google.maps.event.addListener(marker, 'drag', function(e) {
-		var lat = e.latLng.lat();
-		var lng = e.latLng.lng();
-		//$('#coords').html(lat + ', ' + lng);
-		updateCoordDisplay(lat,lng);
-
-	});
-	
-
-}
-
-google.maps.event.addDomListener(window, 'load', initialize);
-
-
-    </script>
-
-	<style type="text/css">
-	td {
-		color:#ccc;
-		font-size:10px;
-		font-family:Verdana, Geneva, sans-serif;
-	}
-	input {
-		font-size:14px;
-	}
-	body {
-		background-color:#333;
-		color:#aaa;
-		font-family:Verdana, Geneva, sans-serif;
-	}
-	</style>
+	<meta charset="utf-8">
+	<title>MapLibre GL JS Example</title>
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+	<script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
+	<link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet">
+	<link rel="stylesheet" href="style.css"> <!-- Assuming styles.css contains the necessary styles -->
 </head>
-
 <body>
-<div style="width:100%; margin:auto;margin-top:20px;">
-	<input type="text" id="location" style="width:600px;" placeholder="Enter a location anywhere in the world" />
-    
-    <input type="button" class="btn btn-info" value="drop marker here" onclick="dropMarker()" />
+	<header id="main-header">
+		<div id="header-title">LatLonGetter</div>
+		<div id="search-container">
+			<input type="text" id="search-input" placeholder="Find location">
+			<button id="search-button">Go</button>
+		</div>
+	</header>
 
-    <div id="map_canvas" style="width:100%;height:400px;"></div>
-    <div>
-    <table>
-    	<tr>
-        	<td>Zoom Level</td>
-            <td>Latitude</td>
-            <td>Longitude</td>
-            <td>Latitude, Longitude</td>
-            <td>Longitude, Latitude</td>
-            <td>Latitude, Longitude (tabbed)</td>
-            <td>Longitude, Latitude (tabbed)</td>
-        </tr>
-        <tr>
-        	<td><input class="span1" id="zl" type="text" value="zoom level" size="6"/></td>
-        	<td><input id="lat" type="text" value="latitude"/></td>
-        	<td><input id="lng" type="text" value="longitude" /></td>
-        	<td><input class="span3" id="latlng" type="text" value="latitude, longitude" size="40" /></td>
-        	<td><input class="span3" id="lnglat" type="text" value="longitude, latitude" size="40" /></td>
-        	<td><input class="span3" id="latlngtab" type="text" value="lat lng tabbed" size="40" /></td>
-        	<td><input class="span3" id="lnglattab" type="text" value="lng lat tabbed" size="40" /></td>
-        </tr>
-    </table>
-    </div>
-        
-</div>
+	<div id="modal-overlay">
+		<div id="modal-content">
+			<h2>LatLonGetter</h2>
+			<p>Welcome! Click anywhere on the map to place a marker and get its latitude and longitude. You can drag the marker to update the coordinates. Use the dropdown menu to switch between different basemaps.</p>
+			<button id="modal-close-button">Get your lat/lon's ➡︎</button>
+		</div>
+	</div>
 
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	<div id="map"></div>
+	<div id="basemap-container">
+		<select id="basemapSwitcher"></select>
+	</div>
+	<div id="footer">
+		<div class="input-group">
+			<label for="latLonInput">Latitude, Longitude</label>
+			<input type="text" id="latLonInput" readonly placeholder="Lat, Lon">
+		</div>
+		<div class="input-group">
+			<label for="latInput">Latitude</label>
+			<input type="text" id="latInput" readonly placeholder="Latitude">
+		</div>
+		<div class="input-group">
+			<label for="lonInput">Longitude</label>
+			<input type="text" id="lonInput" readonly placeholder="Longitude">
+		</div>
+		<div class="input-group">
+			<label for="lonLatInput">Longitude, Latitude</label>
+			<input type="text" id="lonLatInput" readonly placeholder="Lon, Lat">
+		</div>
+	</div>
+	<script src="basemaps.js"></script> <!-- Assuming basemaps.js contains the basemap definitions -->
+	<script>
 
-  ga('create', 'UA-962393-18', 'auto');
-  ga('send', 'pageview');
+		let draggableMarker = null;
+		let lastMarkerLngLat = null; 
+		let copiedPopupTimeout = null; // To manage the timeout for the popup
 
-</script>
+		// Create the copied popup element once
+		const copiedPopup = document.createElement('div');
+		copiedPopup.className = 'copied-popup';
+		document.body.appendChild(copiedPopup);
 
+		// Geocoding elements
+		const searchInput = document.getElementById('search-input');
+		const searchButton = document.getElementById('search-button');
+
+		function createCustomMarkerElement() {
+			const el = document.createElement('div');
+			el.className = 'custom-marker';
+			return el;
+		}
+
+		// Helper function to get URL parameters
+		function getURLParameter(name) {
+			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+			var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+			var results = regex.exec(location.search);
+			return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
+		}
+
+		// Get initial values from URL or use defaults
+		const initialLat = parseFloat(getURLParameter('lat')) || 0;
+		const initialLon = parseFloat(getURLParameter('lon')) || 0;
+		const initialZoom = parseFloat(getURLParameter('zoom')) || 2;
+		const initialBasemapId = getURLParameter('basemapid') || basemaps[0].id;
+		const initialPinLat = getURLParameter('pin_lat') ? parseFloat(getURLParameter('pin_lat')) : null;
+		const initialPinLon = getURLParameter('pin_lon') ? parseFloat(getURLParameter('pin_lon')) : null;
+
+		let initialStyle = basemaps.find(b => b.id === initialBasemapId)?.style || basemaps[0].style;
+
+		var map = new maplibregl.Map({
+			container: 'map',
+			style: initialStyle, 
+			center: [initialLon, initialLat],
+			zoom: initialZoom
+		});
+
+		const basemapSwitcher = document.getElementById('basemapSwitcher');
+		const optgroups = {}; 
+
+		basemaps.forEach(basemap => {
+			const option = document.createElement('option');
+			option.value = basemap.id;
+			option.textContent = basemap.name;
+
+			if (basemap.group) {
+				if (!optgroups[basemap.group]) {
+					const optgroup = document.createElement('optgroup');
+					optgroup.label = basemap.group;
+					optgroups[basemap.group] = optgroup;
+					basemapSwitcher.appendChild(optgroup);
+				}
+				optgroups[basemap.group].appendChild(option);
+			} else {
+				basemapSwitcher.appendChild(option);
+			}
+		});
+		basemapSwitcher.value = initialBasemapId; // Set dropdown to match initial/URL basemap
+
+		// Modal JavaScript
+		const modalOverlay = document.getElementById('modal-overlay');
+		const modalCloseButton = document.getElementById('modal-close-button');
+
+		modalCloseButton.addEventListener('click', () => {
+			modalOverlay.style.display = 'none';
+		});
+
+		// Show modal on page load by default (it's visible via CSS initially)
+		// If you want to control it via JS:
+		// window.addEventListener('load', () => {
+		//     modalOverlay.style.display = 'flex';
+		// });
+
+		// Function to update URL parameters
+		function updateURLParameters() {
+			const params = new URLSearchParams(window.location.search);
+			const center = map.getCenter();
+			params.set('lat', center.lat.toFixed(6));
+			params.set('lon', center.lng.toFixed(6));
+			params.set('zoom', map.getZoom().toFixed(2));
+			
+			const selectedBasemapId = basemapSwitcher.value;
+			if (selectedBasemapId) {
+				params.set('basemapid', selectedBasemapId);
+			}
+
+			if (draggableMarker && lastMarkerLngLat) { // Ensure marker exists and has a position
+				params.set('pin_lat', lastMarkerLngLat.lat.toFixed(6));
+				params.set('pin_lon', lastMarkerLngLat.lng.toFixed(6));
+			} else {
+				params.delete('pin_lat');
+				params.delete('pin_lon');
+			}
+
+			const newRelativePathQuery = window.location.pathname + '?' + params.toString();
+			history.replaceState(null, '', newRelativePathQuery);
+		}
+
+
+		function updateCoordinateInputs(lngLat) {
+			const lat = lngLat.lat.toFixed(6); // Limit precision
+			const lon = lngLat.lng.toFixed(6); // Limit precision
+
+			document.getElementById('latInput').value = lat;
+			document.getElementById('lonInput').value = lon;
+			document.getElementById('latLonInput').value = `${lat}, ${lon}`;
+			document.getElementById('lonLatInput').value = `${lon}, ${lat}`;
+		}
+
+		function showCopiedPopup(inputElement, messageText = 'Copied to clipboard!', isError = false) {
+			// Clear any existing timeout to prevent premature hiding
+			if (copiedPopupTimeout) {
+				clearTimeout(copiedPopupTimeout);
+			}
+
+			const rect = inputElement.getBoundingClientRect();
+			copiedPopup.textContent = messageText;
+			copiedPopup.style.backgroundColor = isError ? '#dc3545' : '#28a745'; // Red for error, green for success
+			
+			// Position above the element (input or search input)
+			copiedPopup.style.left = `${rect.left + window.scrollX}px`;
+			copiedPopup.style.top = `${rect.top + window.scrollY - copiedPopup.offsetHeight - 5}px`; // 5px offset
+
+			copiedPopup.classList.add('show');
+
+			copiedPopupTimeout = setTimeout(() => {
+				copiedPopup.classList.remove('show');
+			}, 2500); // Hide after 2.5 seconds
+		}
+
+
+		function handleInputClick(event) {
+			const inputElement = event.target;
+			inputElement.select(); // Select all text
+
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				navigator.clipboard.writeText(inputElement.value)
+					.then(() => {
+						showCopiedPopup(inputElement);
+					})
+					.catch(err => {
+						console.error('Failed to copy text: ', err);
+						showCopiedPopup(inputElement, 'Copy failed!', true);
+					});
+			} else {
+				try {
+					document.execCommand('copy');
+					showCopiedPopup(inputElement);
+				} catch (err) {
+					console.error('Fallback copy failed: ', err);
+					showCopiedPopup(inputElement, 'Copy failed!', true);
+				}
+			}
+		}
+
+		// Add click listeners to input fields
+		const inputIds = ['latInput', 'lonInput', 'latLonInput', 'lonLatInput'];
+		inputIds.forEach(id => {
+			const inputElement = document.getElementById(id);
+			if (inputElement) {
+				inputElement.addEventListener('click', handleInputClick);
+			}
+		});
+
+
+		function addMarkerListeners(marker) {
+			marker.on('drag', () => {
+				const currentLngLat = marker.getLngLat();
+				updateCoordinateInputs(currentLngLat);
+				lastMarkerLngLat = currentLngLat; 
+				updateURLParameters(); 
+			});
+
+			marker.on('dragend', () => {
+				const finalLngLat = marker.getLngLat();
+				updateCoordinateInputs(finalLngLat);
+				lastMarkerLngLat = finalLngLat; 
+				updateURLParameters(); 
+			});
+		}
+		
+		async function geocodeAndZoom(query) {
+			if (!query.trim()) {
+				showCopiedPopup(searchInput, 'Please enter a location.', true);
+				return;
+			}
+			const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+			try {
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error(`Nominatim API error: ${response.statusText}`);
+				}
+				const data = await response.json();
+
+				if (data && data.length > 0) {
+					const result = data[0];
+					const lat = parseFloat(result.lat);
+					const lon = parseFloat(result.lon);
+					const lngLat = { lat: lat, lng: lon };
+
+					map.flyTo({
+						center: [lon, lat],
+						zoom: 15 // Adjust zoom level as needed
+					});
+
+					if (draggableMarker) {
+						draggableMarker.setLngLat([lon, lat]);
+					} else {
+						draggableMarker = new maplibregl.Marker({
+							element: createCustomMarkerElement(),
+							draggable: true
+						})
+						.setLngLat([lon, lat])
+						.addTo(map);
+						addMarkerListeners(draggableMarker);
+					}
+					updateCoordinateInputs(lngLat);
+					lastMarkerLngLat = lngLat;
+					updateURLParameters();
+					showCopiedPopup(searchInput, `Found: ${result.display_name.substring(0,30)}...`);
+
+				} else {
+					showCopiedPopup(searchInput, 'Location not found.', true);
+				}
+			} catch (error) {
+				console.error('Geocoding error:', error);
+				showCopiedPopup(searchInput, 'Error finding location.', true);
+			}
+		}
+
+		searchButton.addEventListener('click', () => {
+			geocodeAndZoom(searchInput.value);
+		});
+
+		searchInput.addEventListener('keypress', (event) => {
+			if (event.key === 'Enter') {
+				geocodeAndZoom(searchInput.value);
+			}
+		});
+		
+		map.on('load', function() { // For initial map load
+			if (initialPinLat !== null && initialPinLon !== null) {
+				if (!draggableMarker) { // Create marker if not already restored by a style change
+					draggableMarker = new maplibregl.Marker({
+						element: createCustomMarkerElement(),
+						draggable: true
+					})
+					.setLngLat([initialPinLon, initialPinLat])
+					.addTo(map);
+					
+					lastMarkerLngLat = draggableMarker.getLngLat();
+					updateCoordinateInputs(lastMarkerLngLat);
+					addMarkerListeners(draggableMarker);
+				}
+			}
+			updateURLParameters(); // Set initial URL parameters after everything is loaded
+		});
+
+		map.on('moveend', updateURLParameters); // Update URL on map move/zoom
+
+		map.on('click', function(e) {
+			const lngLat = e.lngLat;
+
+			if (draggableMarker) {
+				draggableMarker.setLngLat([lngLat.lng, lngLat.lat]);
+			} else {
+				draggableMarker = new maplibregl.Marker({
+					element: createCustomMarkerElement(),
+					draggable: true 
+				})
+				.setLngLat([lngLat.lng, lngLat.lat])
+				.addTo(map);
+				addMarkerListeners(draggableMarker);
+			}
+			updateCoordinateInputs(lngLat);
+			lastMarkerLngLat = lngLat; 
+			updateURLParameters(); 
+		});
+
+		basemapSwitcher.addEventListener('change', function() {
+			const selectedBasemapId = this.value;
+			const selectedBasemap = basemaps.find(b => b.id === selectedBasemapId);
+
+			if (selectedBasemap) {
+				const center = map.getCenter();
+				const zoom = map.getZoom();
+				
+				if (draggableMarker) {
+					lastMarkerLngLat = draggableMarker.getLngLat(); // Preserve current marker LngLat
+				}
+				// No need to explicitly set draggableMarker to null here, 
+				// setStyle removes it, and it will be re-created if lastMarkerLngLat exists.
+
+				map.setStyle(selectedBasemap.style);
+
+				map.once('load', () => { 
+					map.setCenter(center);
+					map.setZoom(zoom);
+
+					if (lastMarkerLngLat) {
+						draggableMarker = new maplibregl.Marker({
+							element: createCustomMarkerElement(),
+							draggable: true
+						})
+						.setLngLat(lastMarkerLngLat)
+						.addTo(map);
+						addMarkerListeners(draggableMarker);
+						updateCoordinateInputs(lastMarkerLngLat); // Update inputs for restored marker
+					} else {
+						draggableMarker = null; // Ensure it's null if no marker was restored
+					}
+					updateURLParameters(); // Update URL after style change and potential marker restoration
+				});
+			}
+		});
+	</script>
 </body>
 </html>
