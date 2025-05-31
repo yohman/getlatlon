@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>MapLibre GL JS Example</title>
+	<title>LatLon Getter</title>
 	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 	<script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
 	<link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet">
@@ -11,17 +11,20 @@
 <body>
 	<header id="main-header">
 		<div id="header-title">LatLonGetter</div>
-		<div id="search-container">
-			<input type="text" id="search-input" placeholder="Find location">
-			<button id="search-button">Go</button>
-		</div>
+		<div id="header-subtitle">緯度経度、いただき！</div>
 	</header>
+
+	<div id="search-container">
+		<input type="text" id="search-input" placeholder="場所を検索">
+		<button id="search-button">Go</button>
+	</div>
 
 	<div id="modal-overlay">
 		<div id="modal-content">
 			<h2>LatLonGetter</h2>
-			<p>Welcome! Click anywhere on the map to place a marker and get its latitude and longitude. You can drag the marker to update the coordinates. Use the dropdown menu to switch between different basemaps.</p>
-			<button id="modal-close-button">Get your lat/lon's ➡︎</button>
+			<p>Welcome! Click anywhere on the map to place a marker and get its latitude (緯度) and longitude (経度). You can drag the marker to update the coordinates. Use the dropdown menu to switch between different basemaps.</p>
+			<p>ようこそ！地図をクリックしてマーカーを配置し、その緯度と経度を取得します。マーカーをドラッグして座標を更新できます。ドロップダウンメニューを使用して、異なるベースマップを切り替えます。</p>
+			<button id="modal-close-button">緯度/経度を取得 ➡︎</button>
 		</div>
 	</div>
 
@@ -31,20 +34,20 @@
 	</div>
 	<div id="footer">
 		<div class="input-group">
-			<label for="latLonInput">Latitude, Longitude</label>
-			<input type="text" id="latLonInput" readonly placeholder="Lat, Lon">
+			<label for="latLonInput">Latitude, Longitude (緯度、経度)</label>
+			<input type="text" id="latLonInput" readonly placeholder="Lat, Lon (緯度、経度)">
 		</div>
-		<div class="input-group">
-			<label for="latInput">Latitude</label>
-			<input type="text" id="latInput" readonly placeholder="Latitude">
+		<div class="input-group input-group-hidden">
+			<label for="latInput">Latitude (緯度)</label>
+			<input type="text" id="latInput" readonly placeholder="Latitude (緯度)">
 		</div>
-		<div class="input-group">
-			<label for="lonInput">Longitude</label>
-			<input type="text" id="lonInput" readonly placeholder="Longitude">
+		<div class="input-group input-group-hidden">
+			<label for="lonInput">Longitude (経度)</label>
+			<input type="text" id="lonInput" readonly placeholder="Longitude (経度)">
 		</div>
-		<div class="input-group">
-			<label for="lonLatInput">Longitude, Latitude</label>
-			<input type="text" id="lonLatInput" readonly placeholder="Lon, Lat">
+		<div class="input-group input-group-hidden">
+			<label for="lonLatInput">Longitude, Latitude (経度、緯度)</label>
+			<input type="text" id="lonLatInput" readonly placeholder="Lon, Lat (経度、緯度)">
 		</div>
 	</div>
 	<script src="basemaps.js"></script> <!-- Assuming basemaps.js contains the basemap definitions -->
@@ -62,6 +65,7 @@
 		// Geocoding elements
 		const searchInput = document.getElementById('search-input');
 		const searchButton = document.getElementById('search-button');
+		const headerTitle = document.getElementById('header-title'); // Get header title element
 
 		function createCustomMarkerElement() {
 			const el = document.createElement('div');
@@ -78,9 +82,9 @@
 		}
 
 		// Get initial values from URL or use defaults
-		const initialLat = parseFloat(getURLParameter('lat')) || 0;
-		const initialLon = parseFloat(getURLParameter('lon')) || 0;
-		const initialZoom = parseFloat(getURLParameter('zoom')) || 2;
+		const initialLat = parseFloat(getURLParameter('lat')) || 35.6895; // Tokyo Latitude
+		const initialLon = parseFloat(getURLParameter('lon')) || 139.6917; // Tokyo Longitude
+		const initialZoom = parseFloat(getURLParameter('zoom')) || 5;
 		const initialBasemapId = getURLParameter('basemapid') || basemaps[0].id;
 		const initialPinLat = getURLParameter('pin_lat') ? parseFloat(getURLParameter('pin_lat')) : null;
 		const initialPinLon = getURLParameter('pin_lon') ? parseFloat(getURLParameter('pin_lon')) : null;
@@ -123,6 +127,14 @@
 		modalCloseButton.addEventListener('click', () => {
 			modalOverlay.style.display = 'none';
 		});
+
+		// Header title click to reset
+		if (headerTitle) {
+			headerTitle.addEventListener('click', () => {
+				// Navigate to the base path, clearing query parameters and causing a reload
+				window.location.href = window.location.pathname;
+			});
+		}
 
 		// Show modal on page load by default (it's visible via CSS initially)
 		// If you want to control it via JS:

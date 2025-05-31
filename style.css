@@ -12,12 +12,13 @@ body {
 			top: 0;
 			left: 0;
 			width: 100%;
-			height: 60px; 
+			/* height: 60px; Height might need to be auto or adjusted if subtitle makes it taller */
 			background-color: #1a1a1a; 
 			display: flex;
-			align-items: center;
-			justify-content: space-between; /* Positions title left, search right */
-			padding: 0 20px;
+			flex-direction: column; /* Stack title and subtitle vertically */
+			align-items: flex-start; 
+			justify-content: center; /* Center items vertically if header has fixed height */
+			padding: 10px 20px; /* Adjust padding as needed */
 			box-sizing: border-box;
 			z-index: 100; 
 			border-bottom: 1px solid #444;
@@ -27,11 +28,26 @@ body {
 			font-size: 1.5em;
 			color: #eee;
 			font-weight: bold;
+			cursor: pointer; /* Add cursor to indicate clickability */
+			line-height: 1.2; /* Adjust line height if needed */
+		}
+
+		#header-subtitle {
+			font-size: 0.8em;
+			color: #bbb; /* Lighter color for subtitle */
+			margin-top: 2px; /* Small space between title and subtitle */
+			line-height: 1; /* Adjust line height if needed */
 		}
 
 		#search-container {
-			display: flex;
+			position: absolute; /* Changed from flex */
+			top: 70px; /* Header height (60px) + 10px margin */
+			left: 50%;
+			transform: translateX(-50%);
+			display: flex; /* Keep flex for input and button alignment */
 			align-items: center;
+			z-index: 50; /* Above map, below header/modal */
+			/* width: auto; by default for absolute positioning with non-block children */
 		}
 
 		#search-input {
@@ -40,7 +56,7 @@ body {
 			border-radius: 4px 0 0 4px;
 			background-color: #444;
 			color: #ddd;
-			font-size: 14px;
+			font-size: 1.2em; /* Adjusted font size */
 			width: 200px; 
 			outline: none;
 		}
@@ -55,7 +71,7 @@ body {
 			border-radius: 0 4px 4px 0;
 			background-color: #555;
 			color: white;
-			font-size: 14px;
+			font-size: 1.2em; /* Adjusted font size */
 			cursor: pointer;
 			transition: background-color 0.3s ease;
 		}
@@ -66,7 +82,7 @@ body {
 		#map { 
 			position: absolute; 
 			top: 60px; /* Adjusted for header height */
-			bottom: 120px; /* Default bottom for larger screens */
+			bottom: 100px; /* Remains 100px for default footer height */
 			width: 100%; 
 		}
 		#footer {
@@ -74,12 +90,12 @@ body {
 			bottom: 0;
 			left: 0;
 			width: 100%;
-			height: 120px; /* Default height for larger screens */
+			height: 100px; /* Default height */
 			background-color: #222; /* Darker footer background */
 			display: flex;
-			align-items: flex-start; 
+			align-items: center; /* Vertically center the remaining input group */
 			justify-content: center;
-			flex-wrap: wrap;
+			flex-wrap: wrap; /* Keep for safety, though likely not needed now */
 			padding: 10px; 
 			box-sizing: border-box;
 			transition: height 0.3s ease, bottom 0.3s ease; /* Smooth transition for height changes */
@@ -88,6 +104,9 @@ body {
 			display: flex;
 			flex-direction: column; 
 			margin: 5px 10px; 
+		}
+		.input-group-hidden {
+			display: none; /* Hide specified input groups */
 		}
 		#footer label {
 			margin-bottom: 3px; 
@@ -127,7 +146,7 @@ body {
         }
 		#basemap-container {
 			position: absolute;
-			top: 70px; /* Adjusted for header height + 10px padding */
+			bottom: 110px; /* map bottom (100px) + 10px margin */
 			right: 10px;
 			z-index: 1; 
 			background-color: #2a2a2a; 
@@ -248,20 +267,21 @@ body {
 				height: auto; /* Allow footer to grow if content wraps */
 				padding-top: 10px;
 				padding-bottom: 10px;
+				/* align-items: center; is inherited */
+				/* justify-content: center; is inherited */
 			}
 			.input-group {
-				width: calc(50% - 20px); /* Two items per row, accounting for margin */
-				min-width: 200px; /* Prevent inputs from becoming too small */
+				/* width: calc(50% - 20px); Removed, not needed for single centered item */
+				/* min-width: 200px; Removed */
+				margin: 5px auto; /* Center the single group if footer is wider */
 			}
-			#footer input[type="text"] {
-				width: 100%; /* Inputs fill their group */
-			}
+			/* #footer input[type="text"] { width: 100%; } Removed, #latLonInput has specific width rules */
 			#map {
 				top: 60px; /* Ensure map top is consistent with header */
-				bottom: 170px; /* Approximate height for 2 rows of inputs in footer */
+				bottom: 83px; /* Approx. footer height: 10px padding + ~63px input group + 10px padding */
 			}
 			#basemap-container {
-				top: 70px; /* Ensure consistent top with header */
+				bottom: 93px; /* map bottom (83px) + 10px margin */
 			}
 		}
 
@@ -274,13 +294,16 @@ body {
 			#header-title {
 				font-size: 1.2em; 
 			}
+			#search-container { /* Added responsive rule for search-container */
+				top: 60px; /* New header height (50px) + 10px margin */
+			}
 			#search-input {
-				width: 120px; 
-				font-size: 12px;
+				width: 150px; 
+				font-size: 1em; /* Adjusted for smaller screens, was 12px */
 				padding: 7px 10px;
 			}
 			#search-button {
-				font-size: 12px;
+				font-size: 1em; /* Adjusted for smaller screens, was 12px */
 				padding: 7px 10px;
 			}
 			#footer {
@@ -289,18 +312,16 @@ body {
 				padding-bottom: 10px;
 			}
 			.input-group {
-				width: 100%; /* Full width for inputs */
+				width: 100%; /* Full width for the remaining input group */
 				margin: 5px 0; /* Reduced margin for smaller screens */
 			}
-			#footer input[type="text"] {
-				width: 100%; /* Inputs fill their group */
-			}
+			/* #footer input[type="text"] { width: 100%; } Covered by .input-group width and #latLonInput specific rules */
 			#map {
 				top: 50px; /* Adjusted for smaller header */
-				bottom: 280px; /* Approximate height for 4 rows of inputs in footer */
+				bottom: 83px; /* Approx. footer height: 10px padding + ~63px input group + 10px padding */
 			}
 			#basemap-container {
-				top: 60px; /* Adjusted for smaller header + 10px padding */
+				bottom: 93px; /* map bottom (83px) + 10px margin */
 				padding: 5px;
 			}
 			#basemap-container select {

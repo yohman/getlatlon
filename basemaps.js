@@ -1,4 +1,45 @@
-		const basemaps = [
+const basemaps = [
+			{
+				id: 'esri-world-imagery-labels',
+				name: 'World Imagery + Labels',
+				group: 'Esri',
+				note: 'Imagery tiles from Esri. Labels from the World Boundaries and Places service.',
+				style: {
+					version: 8,
+					sources: {
+						'esri-world-imagery': {
+							type: 'raster',
+							tiles: [
+								'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+							],
+							tileSize: 256,
+							attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> — Source: Esri, Earthstar Geographics',
+							maxzoom: 19
+						},
+						'esri-reference-labels': {
+							type: 'raster',
+							tiles: [
+								'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
+							],
+							tileSize: 256,
+							attribution: 'Labels &copy; <a href="https://www.esri.com/">Esri</a>',
+							maxzoom: 19
+						}
+					},
+					layers: [
+						{
+							id: 'esri-world-imagery-layer',
+							type: 'raster',
+							source: 'esri-world-imagery'
+						},
+						{
+							id: 'esri-reference-labels-layer',
+							type: 'raster',
+							source: 'esri-reference-labels'
+						}
+					]
+				}
+			},
 			{
 				id: 'esri-world-imagery',
 				name: 'World Imagery',
@@ -22,6 +63,36 @@
 						type: 'raster',
 						source: 'esri-world-imagery'
 					}]
+				}
+			},
+			{
+				id: 'mapbox-satellite-labels',
+				name: 'Mapbox Satellite + Labels',
+				group: 'Mapbox',
+				note: 'Imagery, streets, and labels from Mapbox. Requires a Mapbox Access Token.',
+				style: {
+					version: 8,
+					// No longer need glyphs for a pure raster style
+					sources: {
+						'mapbox-streets-satellite': { // Changed source name for clarity
+							type: 'raster',
+							tiles: [
+								// Use the mapbox.streets-satellite style ID
+								'https://api.mapbox.com/v4/mapbox.streets-satellite/{z}/{x}/{y}@2x.jpg?access_token=pk.eyJ1IjoieW9obWFuIiwiYSI6IkxuRThfNFkifQ.u2xRJMiChx914U7mOZMiZw'
+							],
+							tileSize: 256,
+							attribution: 'Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+							maxzoom: 19 // Adjust maxzoom if needed, typically 19-22 for satellite
+						}
+					},
+					layers: [
+						{
+							id: 'mapbox-streets-satellite-layer', // Changed layer ID
+							type: 'raster',
+							source: 'mapbox-streets-satellite' // Use the new source
+						}
+						// Vector label layers are no longer needed
+					]
 				}
 			},
 			{
