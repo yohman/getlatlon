@@ -10,8 +10,11 @@
 </head>
 <body>
 	<header id="main-header">
-		<div id="header-title">LatLonGetter</div>
-		<div id="header-subtitle">緯度経度、いただき！</div>
+		<div id="header-text-container">
+			<div id="header-title">LatLonGetter</div>
+			<div id="header-subtitle">緯度経度、いただき！</div>
+		</div>
+		<img id="header-logo" src="images/me.png" alt="Profile Icon"> 
 	</header>
 
 	<div id="search-container">
@@ -22,9 +25,18 @@
 	<div id="modal-overlay">
 		<div id="modal-content">
 			<h2>LatLonGetter</h2>
-			<p>Welcome! Click anywhere on the map to place a marker and get its latitude (緯度) and longitude (経度). You can drag the marker to update the coordinates. Use the dropdown menu to switch between different basemaps.</p>
-			<p>ようこそ！地図をクリックしてマーカーを配置し、その緯度と経度を取得します。マーカーをドラッグして座標を更新できます。ドロップダウンメニューを使用して、異なるベースマップを切り替えます。</p>
-			<button id="modal-close-button">緯度/経度を取得 ➡︎</button>
+			<div class="modal-body-columns">
+				<div class="modal-column modal-column-left">
+					<img src="latlongetter_howto.gif" alt="How to use LatLonGetter animation" class="modal-gif">
+				</div>
+				<div class="modal-column modal-column-right">
+					<!-- <p>Welcome! Click anywhere on the map to place a marker and get its latitude (緯度) and longitude (経度). You can drag the marker to update the coordinates. Use the dropdown menu to switch between different basemaps.</p> -->
+					<p>ようこそ！地図をクリックしてマーカーを配置し、その緯度と経度を取得します。マーカーをドラッグして座標を更新できます。ドロップダウンメニューを使用して、異なるベースマップを切り替えます。</p>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="modal-close-button">緯度/経度を取得 ➡︎</button>
+			</div>
 		</div>
 	</div>
 
@@ -73,21 +85,19 @@
 			return el;
 		}
 
-		// Helper function to get URL parameters
-		function getURLParameter(name) {
-			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-			var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-			var results = regex.exec(location.search);
-			return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
-		}
+		// Get initial values from URL or use defaults -- MODIFY THIS SECTION
+		const initialLat = 35.6895; // Tokyo Latitude
+		const initialLon = 139.6917; // Tokyo Longitude
+		const initialZoom = 5;
+		const initialBasemapId = basemaps[0].id; // Default to the first basemap
+		// Remove initialPinLat and initialPinLon as they are no longer read from URL
+		// const initialPinLat = getURLParameter('pin_lat') ? parseFloat(getURLParameter('pin_lat')) : null;
+		// const initialPinLon = getURLParameter('pin_lon') ? parseFloat(getURLParameter('pin_lon')) : null;
+		// For simplicity, we won't support initial pin from hardcoded values without URL params.
+		// If you need a default pin, you'd add it in map.on('load') directly.
+		const initialPinLat = null; 
+		const initialPinLon = null;
 
-		// Get initial values from URL or use defaults
-		const initialLat = parseFloat(getURLParameter('lat')) || 35.6895; // Tokyo Latitude
-		const initialLon = parseFloat(getURLParameter('lon')) || 139.6917; // Tokyo Longitude
-		const initialZoom = parseFloat(getURLParameter('zoom')) || 5;
-		const initialBasemapId = getURLParameter('basemapid') || basemaps[0].id;
-		const initialPinLat = getURLParameter('pin_lat') ? parseFloat(getURLParameter('pin_lat')) : null;
-		const initialPinLon = getURLParameter('pin_lon') ? parseFloat(getURLParameter('pin_lon')) : null;
 
 		let initialStyle = basemaps.find(b => b.id === initialBasemapId)?.style || basemaps[0].style;
 
@@ -95,7 +105,8 @@
 			container: 'map',
 			style: initialStyle, 
 			center: [initialLon, initialLat],
-			zoom: initialZoom
+			zoom: initialZoom,
+			attributionControl: false // Disable the default attribution control
 		});
 
 		const basemapSwitcher = document.getElementById('basemapSwitcher');
@@ -142,7 +153,8 @@
 		//     modalOverlay.style.display = 'flex';
 		// });
 
-		// Function to update URL parameters
+		// Function to update URL parameters -- REMOVE THIS FUNCTION
+		/*
 		function updateURLParameters() {
 			const params = new URLSearchParams(window.location.search);
 			const center = map.getCenter();
@@ -166,6 +178,7 @@
 			const newRelativePathQuery = window.location.pathname + '?' + params.toString();
 			history.replaceState(null, '', newRelativePathQuery);
 		}
+		*/
 
 
 		function updateCoordinateInputs(lngLat) {
@@ -239,18 +252,18 @@
 				const currentLngLat = marker.getLngLat();
 				updateCoordinateInputs(currentLngLat);
 				lastMarkerLngLat = currentLngLat; 
-				updateURLParameters(); 
+				// updateURLParameters(); // REMOVE THIS CALL
 			});
 
 			marker.on('dragend', () => {
 				const finalLngLat = marker.getLngLat();
 				updateCoordinateInputs(finalLngLat);
 				lastMarkerLngLat = finalLngLat; 
-				updateURLParameters(); 
+				// updateURLParameters(); // REMOVE THIS CALL
 			});
 		}
 		
-		async function geocodeAndZoom(query) {
+		async function geocodeAndZoom(query = '') {
 			if (!query.trim()) {
 				showCopiedPopup(searchInput, 'Please enter a location.', true);
 				return;
@@ -287,7 +300,7 @@
 					}
 					updateCoordinateInputs(lngLat);
 					lastMarkerLngLat = lngLat;
-					updateURLParameters();
+					// updateURLParameters(); // REMOVE THIS CALL
 					showCopiedPopup(searchInput, `Found: ${result.display_name.substring(0,30)}...`);
 
 				} else {
@@ -309,9 +322,30 @@
 			}
 		});
 		
-		map.on('load', function() { // For initial map load
+		map.on('load', function() { 
+			// Add a new attribution control here, after the map's initial style has loaded
+			map.addControl(new maplibregl.AttributionControl({
+				compact: true
+			}), 'bottom-left'); // Specify position: bottom-left
+
+			// --- START: Force attribution to be compact if expanded on load ---
+			// A short delay can sometimes help ensure the control is fully rendered before checking its state.
+			setTimeout(() => {
+				const attributionControlElement = document.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact');
+				if (attributionControlElement && attributionControlElement.classList.contains('maplibregl-compact-show')) {
+					const button = attributionControlElement.querySelector('.maplibregl-ctrl-attrib-button');
+					if (button) {
+						button.click(); // Simulate a click to toggle it to the compact state
+					}
+				}
+			}, 100); // 100ms delay, adjust if needed or remove if it works without.
+			// --- END: Force attribution to be compact ---
+
+			// Existing logic for initial map load
+			// Since initialPinLat/Lon are now always null unless you hardcode them differently,
+			// this block might not be strictly necessary unless you plan to add a default pin.
 			if (initialPinLat !== null && initialPinLon !== null) {
-				if (!draggableMarker) { // Create marker if not already restored by a style change
+				if (!draggableMarker) { 
 					draggableMarker = new maplibregl.Marker({
 						element: createCustomMarkerElement(),
 						draggable: true
@@ -324,10 +358,10 @@
 					addMarkerListeners(draggableMarker);
 				}
 			}
-			updateURLParameters(); // Set initial URL parameters after everything is loaded
+			// updateURLParameters(); // REMOVE THIS CALL
 		});
 
-		map.on('moveend', updateURLParameters); // Update URL on map move/zoom
+		// map.on('moveend', updateURLParameters); // REMOVE THIS EVENT LISTENER
 
 		map.on('click', function(e) {
 			const lngLat = e.lngLat;
@@ -345,7 +379,7 @@
 			}
 			updateCoordinateInputs(lngLat);
 			lastMarkerLngLat = lngLat; 
-			updateURLParameters(); 
+			// updateURLParameters(); // REMOVE THIS CALL
 		});
 
 		basemapSwitcher.addEventListener('change', function() {
@@ -380,7 +414,7 @@
 					} else {
 						draggableMarker = null; // Ensure it's null if no marker was restored
 					}
-					updateURLParameters(); // Update URL after style change and potential marker restoration
+					// updateURLParameters(); // REMOVE THIS CALL
 				});
 			}
 		});
